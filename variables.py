@@ -1,5 +1,5 @@
 from sympy import symbols
-from sympy.parsing.sympy_parser import parse_expr
+from sympy.simplify.simplify import simplify
 
 
 def get_variables(eq):
@@ -18,7 +18,6 @@ def get_variables(eq):
         all_variables.extend(var)
 
     all_variables = [x.strip(' ') for x in all_variables]
-    print(all_variables)
     return all_variables
 
 
@@ -27,14 +26,42 @@ def set_symbols(array) -> dict:
     for i in range(0, len(array)):
         all_symbols[str(array[i])] = symbols(array[i])
 
-    print(all_symbols)
     return all_symbols
 
 
-def replacement(equation, all_symbols):
-    for key in all_symbols:
-        print(key, all_symbols[key])
-        # if key in equation:
-        #     new_equation = equation.replace(key)
+def split(equation):
+    equation = equation.split(' ')
+    split = []
+    for x in equation:
+        if '(' in x:
+            out = x.split('(')
+            split.extend('(')
+            for y in out:
+                if y != '':
+                    split.append(y)
 
-    print(parse_expr(equation))
+        elif ')' in x:
+            out = x.split(')')
+            for y in out:
+                if y != '':
+                    split.append(y)
+            split.extend(')')
+
+        else:
+            split.extend(x)
+
+    return split
+
+
+def replace(splitted):
+    count = 0
+    for x in splitted:
+        if count == 0:
+            expr = symbols(x)
+            count += 1
+        else:
+            expr += symbols(x)
+
+    final_expr = "".join(splitted)
+    final_expr = simplify(final_expr)
+    return final_expr
